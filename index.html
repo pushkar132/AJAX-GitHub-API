@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub User and Repository</title>
+  <script>
+    function getUser() {
+      var username = document.getElementById('username').value;
+      var url = 'https://api.github.com/users/' + username;
+
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {
+            var user = JSON.parse(this.responseText);
+            displayUser(user);
+            getRepositories(username);
+          } else if (this.status == 404) {
+            displayError();
+          }
+        }
+      };
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+
+    function getRepositories(username) {
+      var url = 'https://api.github.com/users/' + username + '/repos';
+
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var repositories = JSON.parse(this.responseText);
+          displayRepositories(repositories);
+        }
+      };
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+
+    function displayUser(user) {
+      var output = document.getElementById('output');
+      output.innerHTML = '<h2>User:</h2>' +
+        '<p><strong>Username:</strong> ' + user.login + '</p>' +
+        '<p><strong>Name:</strong> ' + user.name + '</p>' +
+        '<p><strong>Location:</strong> ' + user.location + '</p>';
+    }
+
+    function displayRepositories(repositories) {
+      var output = document.getElementById('output');
+      output.innerHTML += '<h2>Repositories:</h2>';
+
+      if (repositories.length > 0) {
+        var repoList = document.createElement('ul');
+
+        for (var i = 0; i < repositories.length; i++) {
+          var repo = repositories[i];
+          var listItem = document.createElement('li');
+          listItem.innerHTML = repo.name;
+          repoList.appendChild(listItem);
+        }
+
+        output.appendChild(repoList);
+      } else {
+        output.innerHTML += '<p>No repositories found.</p>';
+      }
+    }
+
+    function displayError() {
+      var output = document.getElementById('output');
+      output.innerHTML = '<p>User not found.</p>';
+    }
+  </script>
+</head>
+<body>
+  <h1>GitHub User and Repository</h1>
+
+  <label for="username">Enter GitHub username:</label>
+  <input type="text" id="username">
+  <button onclick="getUser()">Get User and Repositories</button>
+
+  <div id="output"></div>
+</body>
+</html>
